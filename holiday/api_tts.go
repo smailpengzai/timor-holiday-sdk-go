@@ -3,8 +3,6 @@ package holiday
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 )
 
 // GetTTS 获取综合放假安排描述
@@ -27,22 +25,10 @@ func (c *Client) GetTTSTomorrow() (*TTSResponse, error) {
 
 // getTTSResponse 内部通用的TTS请求方法
 func (c *Client) getTTSResponse(endpoint string) (*TTSResponse, error) {
-	resp, err := c.HTTPClient.Get(endpoint)
+	body, err := c.GetURL(endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
-	defer resp.Body.Close()
-
-	// 检查速率限制
-	if resp.StatusCode == http.StatusTooManyRequests {
-		return nil, ErrRateLimitExceeded
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %w", err)
-	}
-
 	var result TTSResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("解析JSON失败: %w", err)

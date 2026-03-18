@@ -3,7 +3,6 @@ package holiday
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 )
@@ -38,18 +37,10 @@ func (c *Client) GetNextHoliday(req NextRequest) (*NextResponse, error) {
 	}
 
 	// 发送请求
-	resp, err := c.HTTPClient.Get(endpoint)
+	body, err := c.GetURL(endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
-	defer resp.Body.Close()
-
-	// 处理响应
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %w", err)
-	}
-
 	var result NextResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("解析JSON失败: %w, 响应: %s", err, string(body))

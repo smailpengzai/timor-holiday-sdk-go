@@ -3,8 +3,6 @@ package holiday
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 )
 
@@ -19,24 +17,9 @@ func (c *Client) GetInfo(date string) (*InfoResponse, error) {
 	endpoint := fmt.Sprintf("%s/info/%s", c.BaseURL, url.PathEscape(date))
 
 	// 发送请求
-	resp, err := c.HTTPClient.Get(endpoint)
+	body, err := c.GetURL(endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// 检查HTTP状态码
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusTooManyRequests {
-			return nil, ErrRateLimitExceeded
-		}
-		return nil, fmt.Errorf("HTTP错误: %s", resp.Status)
-	}
-
-	// 读取响应
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %w", err)
 	}
 
 	// 解析JSON

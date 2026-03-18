@@ -3,7 +3,6 @@ package holiday
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 )
@@ -36,16 +35,9 @@ func (c *Client) GetBatch(req BatchRequest) (*BatchResponse, error) {
 	}
 
 	// 发送请求
-	resp, err := c.HTTPClient.Get(endpoint)
+	body, err := c.GetURL(endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// 处理响应
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %w", err)
 	}
 
 	var result BatchResponse
